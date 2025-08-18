@@ -21,6 +21,27 @@ function formatDateForDB(dateString) {
     // Return as-is if already in correct format or different format
     return dateString;
 }
+// Helper function to extract notes from lineDescription after Supply content
+function extractNotesFromLineDescription(lineDescription, supply) {
+    if (!lineDescription || !supply)
+        return '';
+    // Find the position of the supply text in the line description
+    const supplyMatch = lineDescription.indexOf(`Supply: ${supply}`);
+    if (supplyMatch === -1)
+        return '';
+    // Find the end of the supply section (next || after the supply text)
+    const supplyEnd = lineDescription.indexOf('||', supplyMatch + `Supply: ${supply}`.length);
+    if (supplyEnd === -1)
+        return '';
+    // Extract everything after the supply section
+    const notesSection = lineDescription.substring(supplyEnd + 2);
+    // Convert double pipes to line breaks and clean up
+    return notesSection
+        .split('||')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join('\n');
+}
 async function parseQuoteXML(xmlContent) {
     try {
         const result = await parseStringPromise(xmlContent);
@@ -68,6 +89,7 @@ async function parseQuoteXML(xmlContent) {
                 kinds: jobline.kinds ? parseInt(jobline.kinds[0]) : undefined,
                 rollDirection: jobline.RollDirection ? jobline.RollDirection[0] : undefined,
                 lineDescription: jobline.lineDescription[0],
+                notes: extractNotesFromLineDescription(jobline.lineDescription[0], jobline.Supply ? jobline.Supply[0] : ''),
                 deliveryToAddress: jobline.deliveryToAddress && jobline.deliveryToAddress[0] !== 'nan' ? jobline.deliveryToAddress[0] : undefined,
                 profitCentreName: jobline.profitCentreName ? jobline.profitCentreName[0] : undefined,
                 processSteps: processSteps
@@ -106,9 +128,9 @@ async function uploadToDatabase(quotes) {
           quotelineid, quotedescription, recipeid, quotedate, customerid, customername,
           quantity, sibling, siblingcount, revision, sizexmm, sizeymm, filename,
           materialname, laminatename, finishingname, printcolour, tool, cores,
-          handmachineapplied, supply, kinds, rolldirection, linedescription,
+          handmachineapplied, supply, kinds, rolldirection, linedescription, notes,
           deliverytoaddress, profitcentrename, status, changehistory, processed
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34) 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35) 
         ON CONFLICT (id) DO UPDATE SET
           lineidentifier = EXCLUDED.lineidentifier,
           lineidentifiernoprefix = EXCLUDED.lineidentifiernoprefix,
@@ -138,6 +160,7 @@ async function uploadToDatabase(quotes) {
           kinds = EXCLUDED.kinds,
           rolldirection = EXCLUDED.rolldirection,
           linedescription = EXCLUDED.linedescription,
+          notes = EXCLUDED.notes,
           deliverytoaddress = EXCLUDED.deliverytoaddress,
           profitcentrename = EXCLUDED.profitcentrename,
           status = EXCLUDED.status,
@@ -149,7 +172,7 @@ async function uploadToDatabase(quotes) {
                 quote.quantity, quote.sibling, quote.siblingCount, quote.revision,
                 quote.sizeXmm, quote.sizeYmm, quote.fileName, quote.materialName, quote.laminateName,
                 quote.finishingName, quote.printColour, quote.tool, quote.cores, quote.handMachineApplied,
-                quote.supply, quote.kinds, quote.rollDirection, quote.lineDescription,
+                quote.supply, quote.kinds, quote.rollDirection, quote.lineDescription, quote.notes,
                 quote.deliveryToAddress, quote.profitCentreName, 'Active', quote.quoteDescription, false
             ]);
             // Note: Process steps are not directly supported in the new schema

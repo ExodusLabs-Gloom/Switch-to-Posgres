@@ -65,6 +65,7 @@ async function parseJobXML(xmlContent) {
                 kinds: jobline.kinds ? parseInt(jobline.kinds[0]) : undefined,
                 rollDirection: jobline.RollDirection ? jobline.RollDirection[0] : undefined,
                 lineDescription: jobline.lineDescription[0],
+                notes: extractNotesFromLineDescription(jobline.lineDescription[0], jobline.Supply ? jobline.Supply[0] : ''),
                 quoteId: jobline.quoteId ? jobline.quoteId[0] : undefined,
                 quoteLineId: jobline.quoteLineId ? jobline.quoteLineId[0] : undefined,
                 quoteDate: jobline.quoteDate ? jobline.quoteDate[0] : undefined,
@@ -92,6 +93,27 @@ function formatDateForDB(dateString) {
     }
     // Return as-is if already in correct format or different format
     return dateString;
+}
+// Helper function to extract notes from lineDescription after Supply content
+function extractNotesFromLineDescription(lineDescription, supply) {
+    if (!lineDescription || !supply)
+        return '';
+    // Find the position of the supply text in the line description
+    const supplyMatch = lineDescription.indexOf(`Supply: ${supply}`);
+    if (supplyMatch === -1)
+        return '';
+    // Find the end of the supply section (next || after the supply text)
+    const supplyEnd = lineDescription.indexOf('||', supplyMatch + `Supply: ${supply}`.length);
+    if (supplyEnd === -1)
+        return '';
+    // Extract everything after the supply section
+    const notesSection = lineDescription.substring(supplyEnd + 2);
+    // Convert double pipes to line breaks and clean up
+    return notesSection
+        .split('||')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .join('\n');
 }
 async function uploadToDatabase(jobs) {
     const client = new Client({
@@ -149,9 +171,9 @@ async function uploadToDatabase(jobs) {
           product_code, product_name, qty_ordered, size_x, size_y,
           sibling, sibling_count, revision, approvers, material_name, 
           finishing_name, print_colour, tool, cores, hand_machine_applied, 
-          supply, kinds, roll_direction, line_description, quote_id, 
+          supply, kinds, roll_direction, line_description, notes, quote_id, 
           quote_line_id, quote_date, profit_centre_name, processed
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37, $38, $39)
         ON CONFLICT (job_id) DO UPDATE SET
           job_number = EXCLUDED.job_number,
           line_identifier = EXCLUDED.line_identifier,
@@ -184,6 +206,7 @@ async function uploadToDatabase(jobs) {
           kinds = EXCLUDED.kinds,
           roll_direction = EXCLUDED.roll_direction,
           line_description = EXCLUDED.line_description,
+          notes = EXCLUDED.notes,
           quote_id = EXCLUDED.quote_id,
           quote_line_id = EXCLUDED.quote_line_id,
           quote_date = EXCLUDED.quote_date,
@@ -198,7 +221,7 @@ async function uploadToDatabase(jobs) {
                 job.productCode, job.productName, job.quantity, job.sizeXmm, job.sizeYmm,
                 job.sibling, job.siblingCount, job.revision, job.approvers, job.materialName,
                 job.finishingName, job.printColour, job.tool, job.cores, job.handMachineApplied,
-                job.supply, job.kinds, job.rollDirection, job.lineDescription, validQuoteId,
+                job.supply, job.kinds, job.rollDirection, job.lineDescription, job.notes, validQuoteId,
                 job.quoteLineId, job.quoteDate ? formatDateForDB(job.quoteDate) : null,
                 job.profitCentreName, false // processed
             ]);

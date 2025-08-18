@@ -42,6 +42,7 @@ CREATE TABLE quotes (
   kinds INTEGER,
   rollDirection TEXT,
   lineDescription TEXT,
+  notes TEXT,
   deliveryToAddress TEXT,
   profitCentreName TEXT,
   status TEXT,
