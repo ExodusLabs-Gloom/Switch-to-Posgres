@@ -1,0 +1,47 @@
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Node modules
+node_modules/
+
+# TypeScript build artifacts
+*.js.map
+
+# Logs
+*.log
+logs/
+switch/jobxml/*.log
+switch/quotexml/*.log
+
+# Database files
+*.db
+*.sqlite
+
+# macOS
+.DS_Store
+.DS_Store?
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backup files
+*.bak
+*.backup
+
+# Test artifacts
+test-results/
+coverage/
+
+# Build artifacts
+dist/
+build/
