@@ -26,10 +26,17 @@ The migration implements a new mapping strategy where:
 
 ### Schema Updates
 
-- **jobs table**: Added 25+ new columns for comprehensive XML field storage
+- **jobs table**: Added 25+ new columns for comprehensive XML field storage including `notes` field
 - **job_operations table**: Enhanced with decimal sequence support and compatibility fields
-- **quotes table**: Full quote data with customer relationships
+- **quotes table**: Full quote data with customer relationships and `notes` field
 - **customer_contacts table**: Enhanced customer contact management
+
+### Notes Functionality
+
+Both job and quote parsers now extract notes from the `lineDescription` field:
+- **Source**: Content after the `Supply:` section in `lineDescription`
+- **Processing**: Double pipe characters (`||`) are converted to line breaks (`\n`)
+- **Storage**: Stored in the `notes` column in both `jobs` and `quotes` tables
 
 ## Installation
 

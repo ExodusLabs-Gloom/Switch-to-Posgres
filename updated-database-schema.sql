@@ -1,9 +1,9 @@
--- Setup script for Switch to PostgreSQL Migration - Updated Schema
--- This script sets up the database tables to match the current TypeScript parsers
+-- Updated Database Schema for Switch to PostgreSQL Migration
+-- Generated from current TypeScript parsers: parse-jobs-new.ts and parse-quotes.ts
 -- Date: 2025-08-18
 
 -- ===================================================================
--- CREATE CORE TABLES
+-- CORE TABLES
 -- ===================================================================
 
 -- TABLE: customers
@@ -126,42 +126,6 @@ CREATE TABLE IF NOT EXISTS job_operations (
 );
 
 -- ===================================================================
--- ADD COLUMNS TO EXISTING TABLES (if they exist and columns are missing)
--- ===================================================================
-
--- Add notes column to jobs table if it doesn't exist
-DO $$ 
-BEGIN 
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'jobs' AND column_name = 'notes') THEN
-    ALTER TABLE jobs ADD COLUMN notes TEXT;
-  END IF;
-END $$;
-
--- Add notes column to quotes table if it doesn't exist  
-DO $$ 
-BEGIN 
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'quotes' AND column_name = 'notes') THEN
-    ALTER TABLE quotes ADD COLUMN notes TEXT;
-  END IF;
-END $$;
-
--- Ensure job_operations.sort is DOUBLE PRECISION (not INTEGER)
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'job_operations' AND column_name = 'sort' AND data_type = 'integer') THEN
-    ALTER TABLE job_operations ALTER COLUMN sort TYPE DOUBLE PRECISION;
-  END IF;
-END $$;
-
--- Ensure job_operations.sequence_order is DOUBLE PRECISION (not INTEGER)
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'job_operations' AND column_name = 'sequence_order' AND data_type = 'integer') THEN
-    ALTER TABLE job_operations ALTER COLUMN sequence_order TYPE DOUBLE PRECISION;
-  END IF;
-END $$;
-
--- ===================================================================
 -- INDEXES FOR PERFORMANCE
 -- ===================================================================
 
@@ -204,56 +168,25 @@ BEGIN
 END;
 $$ language 'plpgsql';
 
--- Triggers for updated_at (only create if tables exist)
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'customers') THEN
-    DROP TRIGGER IF EXISTS update_customers_updated_at ON customers;
-    CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END $$;
-
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'customer_contacts') THEN
-    DROP TRIGGER IF EXISTS update_customer_contacts_updated_at ON customer_contacts;
-    CREATE TRIGGER update_customer_contacts_updated_at BEFORE UPDATE ON customer_contacts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END $$;
-
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'quotes') THEN
-    DROP TRIGGER IF EXISTS update_quotes_updated_at ON quotes;
-    CREATE TRIGGER update_quotes_updated_at BEFORE UPDATE ON quotes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END $$;
-
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'jobs') THEN
-    DROP TRIGGER IF EXISTS update_jobs_updated_at ON jobs;
-    CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON jobs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END $$;
-
-DO $$ 
-BEGIN 
-  IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'job_operations') THEN
-    DROP TRIGGER IF EXISTS update_job_operations_updated_at ON job_operations;
-    CREATE TRIGGER update_job_operations_updated_at BEFORE UPDATE ON job_operations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-  END IF;
-END $$;
+-- Triggers for updated_at
+CREATE TRIGGER update_customers_updated_at BEFORE UPDATE ON customers FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_customer_contacts_updated_at BEFORE UPDATE ON customer_contacts FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_quotes_updated_at BEFORE UPDATE ON quotes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_jobs_updated_at BEFORE UPDATE ON jobs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_job_operations_updated_at BEFORE UPDATE ON job_operations FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ===================================================================
--- VERIFICATION
+-- COMMENTS
 -- ===================================================================
 
--- Show created tables
-SELECT 
-  table_name,
-  table_type 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
-  AND table_name IN ('customers', 'customer_contacts', 'quotes', 'jobs', 'job_operations')
-ORDER BY table_name;
+COMMENT ON TABLE customers IS 'Customer master data';
+COMMENT ON TABLE customer_contacts IS 'Customer contact information';
+COMMENT ON TABLE quotes IS 'Quote data from Switch application';
+COMMENT ON TABLE jobs IS 'Job data from Switch application with new mapping (jobLineId->job_id, jobId->job_number)';
+COMMENT ON TABLE job_operations IS 'Job process steps with decimal sort order support';
+
+COMMENT ON COLUMN jobs.job_id IS 'Primary key: jobLineId from XML (e.g., 373)';
+COMMENT ON COLUMN jobs.job_number IS 'Display number: jobId from XML (e.g., J1200)';
+COMMENT ON COLUMN jobs.notes IS 'Notes extracted from lineDescription after Supply content, || converted to line breaks';
+COMMENT ON COLUMN quotes.notes IS 'Notes extracted from lineDescription after Supply content, || converted to line breaks';
+COMMENT ON COLUMN job_operations.sort IS 'Sort order supporting decimal values (2, 2.5, 2.9, 3, etc.)';
