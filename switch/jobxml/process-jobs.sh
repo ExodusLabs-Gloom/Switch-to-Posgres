@@ -3,7 +3,7 @@
 XML_PATH="$1"
 LOG_FILE="/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/jobxml/jobs.log"
 NODE_PATH="/usr/local/bin/node"
-SCRIPT_PATH="/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/jobxml/parse-jobs.js"
+SCRIPT_PATH="/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/jobxml/parse-jobs-new.js"
 
 # Logging clearly what was passed in
 echo "=======================" >> "$LOG_FILE"

@@ -57,8 +57,9 @@ DB_PASSWORD=your_password
 ```
 
 3. **Setup database schema:**
+Run the SQL scripts directly in your PostgreSQL database:
 ```bash
-./setup-database.sh
+psql -d your_database -f setup-new-mapping.sql
 ```
 
 ## Usage
@@ -175,9 +176,13 @@ The project includes comprehensive sample XML files:
 
 ### Validation
 
-Run the test suite:
+Process sample files to verify the setup:
 ```bash
-./test-new-schema.sh
+# Test job processing
+node switch/jobxml/parse-jobs-new.js switch/jobxml/xml/J1200-373.xml
+
+# Test quote processing  
+node switch/quotexml/parse-quotes.js switch/quotexml/xml/Q15081-18371.xml
 ```
 
 ## Configuration

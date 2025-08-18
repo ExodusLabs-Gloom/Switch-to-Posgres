@@ -18,8 +18,8 @@ fi
 echo "Testing with file: $TEST_FILE"
 
 # Run the updated job parser
-cd "/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/jobxml"
-node parse-jobs.js "$TEST_FILE"
+cd "/Users/Shared/Next-Printing/Resources/Switch to Posgres"
+node switch/jobxml/parse-jobs-new.js "$TEST_FILE"
 
 echo ""
 echo "Test completed. Check the output above for any errors."

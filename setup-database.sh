@@ -31,7 +31,7 @@ if [ $? -eq 0 ]; then
     echo ""
     echo "You can now run the XML parsers:"
     echo "  - Quote parser: cd switch/quotexml && node parse-quotes.js path/to/quote.xml"
-    echo "  - Job parser: cd switch/jobxml && node parse-jobs.js path/to/job.xml"
+    echo "  - Job parser (new schema): node switch/jobxml/parse-jobs-new.js path/to/job.xml"
 else
     echo "❌ Database schema setup failed!"
     echo "Please check your database connection settings and try again."
