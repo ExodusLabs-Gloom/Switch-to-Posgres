@@ -1,0 +1,65 @@
+<order>
+	<orders_id>3514</orders_id>
+	<order_number>003514</order_number>
+	<orders_date_finished>2025-08-10 13:36:24</orders_date_finished>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note>5 design 4 front labels for 500g 4 front labels for 1kg labels and both 500g and 1kg back lags will average the 4 front designs I total so roughly 62 of each of the front labels and 250 of each of the back labels if you have any feedback or easier or cheaper way that would be awesome thanks ☺️ 
+Andrew</order_note>
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>4354</orders_products_id>
+			<products_name>136208</products_name>
+			<products_title>Rectangle Paper Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>120 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>7 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3514_4354_rectangle paper labels_901441.pdf</file>
+			</print_ready_files>
+			<productsize>120 x 170 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>113</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Paper</product_info>
+			<template_info />
+			<bleed_size>176 x 126 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4355</orders_products_id>
+			<products_name>466329</products_name>
+			<products_title>Rectangle Paper Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>130 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>5 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3514_4355_rectangle paper labels_142271.pdf</file>
+			</print_ready_files>
+			<productsize>130 x 170 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>113</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Paper</product_info>
+			<template_info />
+			<bleed_size>176 x 136 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

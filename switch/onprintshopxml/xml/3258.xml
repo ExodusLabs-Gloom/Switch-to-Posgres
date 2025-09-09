@@ -1,0 +1,37 @@
+<order>
+	<orders_id>3258</orders_id>
+	<order_number>003258</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3994</orders_products_id>
+			<products_name>821890</products_name>
+			<products_title>Square Paper Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Finish>Matt Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3258_3994_square paper labels_280390.pdf</file>
+			</print_ready_files>
+			<productsize>40 x 40 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>103</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Paper</product_info>
+			<template_info />
+			<bleed_size>46 x 46 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

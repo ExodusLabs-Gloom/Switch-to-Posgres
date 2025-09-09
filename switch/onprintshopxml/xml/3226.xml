@@ -1,0 +1,63 @@
+<order>
+	<orders_id>3226</orders_id>
+	<order_number>003226</order_number>
+	<shipping_mode>Express (1-2 business days after production):</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>42</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3941</orders_products_id>
+			<products_name>855292</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>250</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>70 mm</Short_Edge>
+				<Finish>Matt Laminate</Finish>
+				<Versions>3 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3226_3941_rectangle synthetic labels_722430.pdf</file>
+			</print_ready_files>
+			<productsize>70 x 130 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>136 x 76 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>3942</orders_products_id>
+			<products_name>249895</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>50 mm</Short_Edge>
+				<Finish>Matt Laminate</Finish>
+				<Versions>2 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3226_3942_rectangle synthetic labels_455486.pdf</file>
+			</print_ready_files>
+			<productsize>50 x 100 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>106 x 56 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

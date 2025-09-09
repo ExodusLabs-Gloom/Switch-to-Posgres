@@ -1,0 +1,40 @@
+<order>
+	<orders_id>3247</orders_id>
+	<order_number>003247</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note>Version 1 = 50
+Version 2 = 100
+Version 3 = 150
+Version 4 = 700</order_note>
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3983</orders_products_id>
+			<products_name>883213</products_name>
+			<products_title>Circle Paper Labels</products_title>
+			<products_quantity>1000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Finish>Matt Laminate</Finish>
+				<Versions>4 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3247_3983_circle paper labels_862373.pdf</file>
+			</print_ready_files>
+			<productsize>60 x 60 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>100</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Paper</product_info>
+			<template_info />
+			<bleed_size>66 x 66 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

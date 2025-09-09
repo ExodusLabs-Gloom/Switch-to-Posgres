@@ -1,0 +1,163 @@
+<order>
+	<orders_id>3450</orders_id>
+	<order_number>003450</order_number>
+	<orders_date_finished>2025-07-30 22:55:01</orders_date_finished>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>4264</orders_products_id>
+			<products_name>724595</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>1000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>25 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4264_rectangle synthetic labels_887941.pdf</file>
+			</print_ready_files>
+			<productsize>25 x 50 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>56 x 31 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4265</orders_products_id>
+			<products_name>328978</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>25 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4265_rectangle synthetic labels_173014.pdf</file>
+			</print_ready_files>
+			<productsize>25 x 50 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>56 x 31 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4266</orders_products_id>
+			<products_name>609170</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>2000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>25 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4266_rectangle synthetic labels_407253.pdf</file>
+			</print_ready_files>
+			<productsize>25 x 50 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>56 x 31 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4267</orders_products_id>
+			<products_name>301813</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>250</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>40 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4267_rectangle synthetic labels_440549.pdf</file>
+			</print_ready_files>
+			<productsize>40 x 60 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>66 x 46 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4268</orders_products_id>
+			<products_name>403932</products_name>
+			<products_title>Square Synthetic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4268_square synthetic labels_567837.pdf</file>
+			</print_ready_files>
+			<productsize>60 x 60 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>102</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>66 x 66 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4269</orders_products_id>
+			<products_name>544088</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>1000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>25 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3450_4269_rectangle synthetic labels_406163.pdf</file>
+			</print_ready_files>
+			<productsize>25 x 40 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>46 x 31 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

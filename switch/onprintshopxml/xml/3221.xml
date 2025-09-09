@@ -1,0 +1,39 @@
+<order>
+	<orders_id>3221</orders_id>
+	<order_number>003221</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3936</orders_products_id>
+			<products_name>Shilajit label</products_name>
+			<products_title>Rectangle Metallic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>30 mm</Short_Edge>
+				<Finish>Gloss Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Hand Applied</Application>
+				<White_Ink>Not Required</White_Ink>
+			</features_details>
+			<print_ready_files>
+				<file>3221_3936_rectangle metallic labels_860533.pdf</file>
+			</print_ready_files>
+			<productsize>30 x 200 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>112</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic Silver</product_info>
+			<template_info />
+			<bleed_size>206 x 36 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

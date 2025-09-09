@@ -1,0 +1,68 @@
+<order>
+	<orders_id>3688</orders_id>
+	<order_number>003688</order_number>
+	<orders_date_finished>2025-08-28 14:50:41</orders_date_finished>
+	<shipping_mode>Express (1-2 business days after production):</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>42</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>4600</orders_products_id>
+			<products_name>622063</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>2000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>40 mm</Short_Edge>
+				<Finish>Matt Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Machine Applied</Application>
+				<Core_Size>76mm</Core_Size>
+				<Roll_Direction>Left Edge leading</Roll_Direction>
+			</features_details>
+			<print_ready_files>
+				<file>3688_4600_rectangle synthetic labels_190259.pdf</file>
+			</print_ready_files>
+			<productsize>40 x 60 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>66 x 46 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>4601</orders_products_id>
+			<products_name>622063</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>1000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>40 mm</Short_Edge>
+				<Finish>Matt Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Machine Applied</Application>
+				<Core_Size>76mm</Core_Size>
+				<Roll_Direction>Left Edge leading</Roll_Direction>
+			</features_details>
+			<print_ready_files>
+				<file>3688_4601_rectangle synthetic labels_167289.pdf</file>
+			</print_ready_files>
+			<productsize>40 x 60 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>66 x 46 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

@@ -1,0 +1,39 @@
+<order>
+	<orders_id>3230</orders_id>
+	<order_number>003230</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3946</orders_products_id>
+			<products_name>Terra Ridge BV Merlot Labels</products_name>
+			<products_title>Standard Wine Labels</products_title>
+			<products_quantity>2000</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Finish>Matt Laminate</Finish>
+				<Versions>1 Versions</Versions>
+				<Application>Machine Applied</Application>
+				<Core_Size>76mm</Core_Size>
+				<Roll_Direction>Left Edge leading</Roll_Direction>
+			</features_details>
+			<print_ready_files>
+				<file>3230_3946_standard wine labels_702782.pdf</file>
+			</print_ready_files>
+			<productsize>80 x 130 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>105</product_id>
+			<is_kit>false</is_kit>
+			<product_info />
+			<template_info />
+			<bleed_size>136 x 86 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

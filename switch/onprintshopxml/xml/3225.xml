@@ -1,0 +1,31 @@
+<order>
+	<orders_id>3225</orders_id>
+	<order_number>003225</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note />
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3940</orders_products_id>
+			<products_name />
+			<products_title>Label Sample Kit</products_title>
+			<products_quantity>1</products_quantity>
+			<template_type>Predefined Product</template_type>
+			<features_details />
+			<print_ready_files />
+			<productsize />
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>110</product_id>
+			<is_kit>false</is_kit>
+			<product_info />
+			<template_info />
+			<bleed_size />
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

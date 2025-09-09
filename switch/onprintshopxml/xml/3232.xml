@@ -1,0 +1,66 @@
+<order>
+	<orders_id>3232</orders_id>
+	<order_number>003232</order_number>
+	<shipping_mode>Standard (4-6 business days after production) – FREE</shipping_mode>
+	<courirer_company_name>Standard Shipping</courirer_company_name>
+	<order_note>Circle labels
+Version 1: 100pcs
+Version 2: 100pcs
+Version 3: 100pcs
+Version 4: 200pcs</order_note>
+	<shipping_type_id>43</shipping_type_id>
+	<product_details>
+		<items>
+			<orders_products_id>3949</orders_products_id>
+			<products_name>828430</products_name>
+			<products_title>Rectangle Synthetic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Short_Edge>80 mm</Short_Edge>
+				<Finish>Matt Laminate</Finish>
+				<Versions>3 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3232_3949_rectangle synthetic labels_161144.pdf</file>
+			</print_ready_files>
+			<productsize>80 x 130 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>111</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>136 x 86 MM</bleed_size>
+		</items>
+		<items>
+			<orders_products_id>3950</orders_products_id>
+			<products_name>878147</products_name>
+			<products_title>Circle Synthetic Labels</products_title>
+			<products_quantity>500</products_quantity>
+			<template_type>Studio</template_type>
+			<features_details>
+				<Finish>Matt Laminate</Finish>
+				<Versions>4 Versions</Versions>
+				<Application>Hand Applied</Application>
+			</features_details>
+			<print_ready_files>
+				<file>3232_3950_circle synthetic labels_940977.pdf</file>
+			</print_ready_files>
+			<productsize>50 x 50 mm</productsize>
+			<product_size_details />
+			<shipping_company />
+			<tracking_number />
+			<product_id>98</product_id>
+			<is_kit>false</is_kit>
+			<product_info>Synthetic -Polypropylene Labels</product_info>
+			<template_info />
+			<bleed_size>56 x 56 MM</bleed_size>
+		</items>
+	</product_details>
+	<shipping_details>
+		<shipping_extrafield />
+	</shipping_details>
+</order>

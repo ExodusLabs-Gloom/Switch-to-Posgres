@@ -101,6 +101,18 @@ node switch/quotexml/parse-quotes.js path/to/quote.xml
 ./switch/quotexml/process-quotes.sh
 ```
 
+### Process Onprintshop XML Files
+
+**Single file:**
+```bash
+node switch/onprintshop/parse-onprintshop.js path/to/onprintshop.xml
+```
+
+**Batch processing:**
+```bash
+./switch/onprintshop/process-onprintshop.sh
+```
+
 ## Project Structure
 
 ```
@@ -110,9 +122,13 @@ node switch/quotexml/parse-quotes.js path/to/quote.xml
 │   │   ├── parse-jobs.ts           # Legacy job parser
 │   │   ├── process-jobs.sh         # Batch job processing
 │   │   └── xml/                    # Sample XML files
-│   └── quotexml/
-│       ├── parse-quotes.ts         # Quote parser
-│       ├── process-quotes.sh       # Batch quote processing
+│   ├── quotexml/
+│   │   ├── parse-quotes.ts         # Quote parser
+│   │   ├── process-quotes.sh       # Batch quote processing
+│   │   └── xml/                    # Sample XML files
+│   └── onprintshop/
+│       ├── parse-onprintshop.ts    # Onprintshop parser
+│       ├── process-onprintshop.sh  # Batch Onprintshop processing
 │       └── xml/                    # Sample XML files
 ├── setup-new-mapping.sql          # Database schema setup
 ├── database_schema.sql             # Complete production schema
@@ -134,6 +150,13 @@ The parser handles Switch job XML files with the following key elements:
 ### Quote XML Structure
 
 - Quote identification and versioning
+- Customer and contact details
+- Line items and specifications
+- Production requirements
+
+### Onprintshop XML Structure
+
+- Onprintshop identification and versioning
 - Customer and contact details
 - Line items and specifications
 - Production requirements
@@ -180,6 +203,7 @@ The following fields are excluded from processing as requested:
 The project includes comprehensive sample XML files:
 - Job files: `J1200-373.xml`, `J1211-406.xml`, etc.
 - Quote files: `Q15081-18371.xml`, `Q15094-18406.xml`, etc.
+- Onprintshop files: `O12345-67890.xml`, `O12346-67891.xml`, etc.
 
 ### Validation
 
@@ -190,6 +214,9 @@ node switch/jobxml/parse-jobs-new.js switch/jobxml/xml/J1200-373.xml
 
 # Test quote processing  
 node switch/quotexml/parse-quotes.js switch/quotexml/xml/Q15081-18371.xml
+
+# Test Onprintshop processing  
+node switch/onprintshop/parse-onprintshop.js switch/onprintshop/xml/O12345-67890.xml
 ```
 
 ## Configuration
@@ -221,6 +248,7 @@ The project uses ES modules with the following key settings:
 
 - Job processing: `switch/jobxml/jobs.log`
 - Quote processing: `switch/quotexml/quotes.log`
+- Onprintshop processing: `switch/onprintshop/onprintshop.log`
 
 ## Development
 
@@ -257,3 +285,29 @@ For technical support or questions about the migration process, contact the deve
 **Last Updated**: August 2025
 **Version**: 1.0.0
 **Database Schema Version**: Production Enhanced
+
+# Onprintshop XML Processing
+
+This module processes Onprintshop XML files and imports them into the PostgreSQL database, following the same structure and logic as the jobxml and quotexml modules.
+
+## Structure
+- `parse-onprintshop.ts`: TypeScript parser for Onprintshop XML files (to be customized after receiving a sample XML).
+- `process-onprintshop.sh`: Shell script to batch process XML files.
+- `xml/`: Directory for Onprintshop XML files.
+
+## Usage
+1. Place Onprintshop XML files in the `xml/` directory.
+2. Run the processing script:
+   ```sh
+   ./process-onprintshop.sh
+   ```
+3. The parser will extract relevant data and import it into the database (logic to be implemented after sample XML is provided).
+
+## Next Steps
+- Await sample Onprintshop XML file.
+- Update `parse-onprintshop.ts` to match the Onprintshop XML structure and database schema.
+- Ensure field mapping, notes extraction, and decimal sort support as per jobxml/quotexml modules.
+
+---
+
+*This module is a work in progress and will be finalized after sample XML analysis.*

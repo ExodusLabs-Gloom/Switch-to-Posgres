@@ -5,7 +5,6 @@ LOG_FILE="/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/onprint
 NODE_PATH="/usr/local/bin/node"
 SCRIPT_PATH="/Users/Shared/Next-Printing/Resources/Switch to Posgres/switch/onprintshopxml/parse-onprintshop.js"
 
-
 # Logging clearly what was passed in
 echo "=======================" >> "$LOG_FILE"
 echo "XML_PATH: $XML_PATH" >> "$LOG_FILE"
