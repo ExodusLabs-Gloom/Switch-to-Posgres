@@ -161,8 +161,25 @@ async function main() {
         if (kindsMatch) {
             kinds = parseInt(kindsMatch[1], 10);
         }
-        // Compose line_identifier_no_prefix as (order_id)_(order productid)
-        const line_identifier_no_prefix = `${order.orders_id?.[0] || ''}_${firstItem.product_id?.[0] || ''}`;
+        // Compose line_identifier_no_prefix: prefer orders_products_id (the user's requested value),
+        // then order_product_id, otherwise fall back to orderId_productId combination.
+        const ordersProductsId = firstItem.orders_products_id?.[0] || firstItem.orders_products_id || null;
+        const orderProductId = firstItem.order_product_id?.[0] || firstItem.order_product_id || null;
+        const orderId = order.orders_id?.[0] || order.orders_id || null;
+        let line_identifier_no_prefix = '';
+        if (ordersProductsId) {
+            line_identifier_no_prefix = String(ordersProductsId);
+        }
+        else if (orderProductId) {
+            line_identifier_no_prefix = String(orderProductId);
+        }
+        else if (orderId) {
+            // fallback: combine order id and any product id present
+            line_identifier_no_prefix = `${orderId}_${orderProductId || ''}`;
+        }
+        // Debug log: ensure we see what will be written for the line identifier
+        console.log('DEBUG: orders_products_id:', ordersProductsId, 'order_product_id:', orderProductId, 'order_id:', orderId);
+        console.log('DEBUG: computed line_identifier_no_prefix =>', line_identifier_no_prefix);
         // Format order_date and calculate due_date (5 business days after order_date)
         let order_date_raw = order.orders_date_finished?.[0] || order.order_date_finished?.[0];
         let order_date = order_date_raw ? formatDateForDB(order_date_raw.split(' ')[0]) : null;
