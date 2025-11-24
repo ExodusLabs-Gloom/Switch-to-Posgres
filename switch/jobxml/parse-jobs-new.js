@@ -5,6 +5,7 @@ import { Client } from 'pg';
 import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { writeFileSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: join(__dirname, '../../.env') });
@@ -100,11 +101,11 @@ async function parseJobXML(xmlContent) {
                 processSteps: processSteps
             });
         }
-        return jobs;
+        return { jobs, processedXml };
     }
     catch (error) {
         console.error('Error parsing XML:', error);
-        return [];
+        return { jobs: [], processedXml: xmlContent };
     }
 }
 // Helper function to convert DD-MM-YYYY to YYYY-MM-DD
@@ -277,8 +278,9 @@ async function uploadToDatabase(jobs) {
 async function main() {
     try {
         console.log('Starting job XML processing...');
-        // Get XML file path from command line arguments
+        // Get XML file path and optional output path from command line arguments
         const xmlFilePath = process.argv[2];
+        const outputPath = process.argv[3]; // Optional: where to save wrapped XML
         if (!xmlFilePath) {
             console.error('Error: Please provide XML file path as argument');
             process.exit(1);
@@ -289,7 +291,17 @@ async function main() {
         }
         console.log(`Processing ${xmlFilePath}...`);
         const xmlContent = readFileSync(xmlFilePath, 'utf8');
-        const jobs = await parseJobXML(xmlContent);
+        const { jobs, processedXml } = await parseJobXML(xmlContent);
+        // If output path is provided, save the wrapped/corrected XML
+        if (outputPath) {
+            try {
+                writeFileSync(outputPath, processedXml, 'utf8');
+                console.log(`Wrapped XML saved to: ${outputPath}`);
+            }
+            catch (error) {
+                console.warn(`Warning: Could not write wrapped XML to ${outputPath}:`, error.message);
+            }
+        }
         if (jobs.length > 0) {
             await uploadToDatabase(jobs);
             console.log(`Successfully processed ${basename(xmlFilePath)}`);
