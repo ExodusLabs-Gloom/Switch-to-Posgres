@@ -108,6 +108,17 @@ async function main() {
     const jobId = 'Labex_' + order.orders_id?.[0];
     const customerId = null; // Set customerId to null for now
 
+    // Format order_date and calculate due_date (5 business days after order_date)
+    let order_date_raw = order.orders_date_finished?.[0] || order.order_date_finished?.[0];
+    let order_date = order_date_raw ? formatDateForDB(order_date_raw.split(' ')[0]) : null;
+    let due_date: string | null = null;
+    if (order_date) {
+      const orderDateObj = new Date(order_date);
+      const dueDateObj = addBusinessDays(orderDateObj, 5);
+      // Format as YYYY-MM-DD
+      due_date = dueDateObj.toISOString().slice(0, 10);
+    }
+
     // Connect to Postgres
     const client = new Client({
       host: process.env.PG_HOST,
@@ -118,91 +129,80 @@ async function main() {
     });
     await client.connect();
 
-    // Extract job line details from the first <items> (if present)
-    const firstItem = order.product_details?.[0]?.items?.[0] || {};
-    // Normalized material from job line
-    const material = normalizeMaterial(firstItem.products_title?.[0], firstItem.product_info?.[0]);
+    // Extract job line details from all <items> (if present)
+    const items = order.product_details?.[0]?.items || [];
 
-    // Parse size into size_x and size_y (expects format like '100x200mm' or '100 x 200 mm')
-    let size_x = null, size_y = null;
-    const sizeStr = firstItem.productsize?.[0] || '';
-    const sizeMatch = sizeStr.match(/(\d+(?:\.\d+)?)\s*[xX]\s*(\d+(?:\.\d+)?)/);
-    if (sizeMatch) {
-      size_x = parseFloat(sizeMatch[1]);
-      size_y = parseFloat(sizeMatch[2]);
-    }
+    for (const item of items) {
+      const firstItem = item;
+      // Normalized material from job line
+      const material = normalizeMaterial(firstItem.products_title?.[0], firstItem.product_info?.[0]);
 
-    // --- Finishing Normalization ---
-    let finishing_id = null;
-    const finish = firstItem.features_details?.[0]?.Finish?.[0]?.toLowerCase() || '';
-    const productTitle = firstItem.products_title?.[0]?.toLowerCase() || '';
-    if (finish.includes('gloss')) {
-      finishing_id = 'GLOSS_LAM';
-    } else if (finish.includes('matt')) {
-      finishing_id = 'MATT_LAM';
-    } else if (productTitle.includes('premium wine')) {
-      finishing_id = 'MATT_VARN';
-    }
+      // Parse size into size_x and size_y (expects format like '100x200mm' or '100 x 200 mm')
+      let size_x: number | null = null, size_y: number | null = null;
+      const sizeStr = firstItem.productsize?.[0] || '';
+      const sizeMatch = sizeStr.match(/(\d+(?:\.\d+)?)\s*[xX]\s*(\d+(?:\.\d+)?)/);
+      if (sizeMatch) {
+        size_x = parseFloat(sizeMatch[1]);
+        size_y = parseFloat(sizeMatch[2]);
+      }
 
-    // --- Material Normalization for material_id ---
-    let material_id = null;
-    const materialStr = `${firstItem.products_title?.[0] || ''} ${firstItem.product_info?.[0] || ''}`.toLowerCase();
-    if (materialStr.includes('metallic')) {
-      material_id = 'MAT-JOB-1755527048343-6';
-    } else if (materialStr.includes('synthetic') || materialStr.includes('craft beer')) {
-      material_id = 'MAT-JOB-1755527048344-7';
-    } else if (materialStr.includes('standard') || materialStr.includes('paper')) {
-      material_id = 'MAT-JOB-1755527048346-12';
-    } else if (materialStr.includes('premium')) {
-      material_id = 'MAT-JOB-1755527048335-0';
-    }
+      // --- Finishing Normalization ---
+      let finishing_id: string | null = null;
+      const finish = firstItem.features_details?.[0]?.Finish?.[0]?.toLowerCase() || '';
+      const productTitle = firstItem.products_title?.[0]?.toLowerCase() || '';
+      if (finish.includes('gloss')) {
+        finishing_id = 'GLOSS_LAM';
+      } else if (finish.includes('matt')) {
+        finishing_id = 'MATT_LAM';
+      } else if (productTitle.includes('premium wine')) {
+        finishing_id = 'MATT_VARN';
+      }
 
-    // --- Print Colour Normalization ---
-    let print_colour = 'CMYK';
-    const whiteInk = firstItem.features_details?.[0]?.White_Ink?.[0]?.toLowerCase() || '';
-    if (whiteInk === 'required' || whiteInk === 'yes' || whiteInk === 'true') {
-      print_colour = 'W+CMYK';
-    }
+      // --- Material Normalization for material_id ---
+      let material_id: string | null = null;
+      const materialStr = `${firstItem.products_title?.[0] || ''} ${firstItem.product_info?.[0] || ''}`.toLowerCase();
+      if (materialStr.includes('metallic')) {
+        material_id = 'MAT-JOB-1755527048343-6';
+      } else if (materialStr.includes('synthetic') || materialStr.includes('craft beer')) {
+        material_id = 'MAT-JOB-1755527048344-7';
+      } else if (materialStr.includes('standard') || materialStr.includes('paper')) {
+        material_id = 'MAT-JOB-1755527048346-12';
+      } else if (materialStr.includes('premium')) {
+        material_id = 'MAT-JOB-1755527048335-0';
+      }
 
-    // Parse kinds (versions) as integer
-    let kinds = 0;
-    const versionsRaw = firstItem.features_details?.[0]?.Versions?.[0] || '';
-    const kindsMatch = versionsRaw.match(/(\d+)/);
-    if (kindsMatch) {
-      kinds = parseInt(kindsMatch[1], 10);
-    }
+      // --- Print Colour Normalization ---
+      let print_colour = 'CMYK';
+      const whiteInk = firstItem.features_details?.[0]?.White_Ink?.[0]?.toLowerCase() || '';
+      if (whiteInk === 'required' || whiteInk === 'yes' || whiteInk === 'true') {
+        print_colour = 'W+CMYK';
+      }
 
-    // Compose line_identifier_no_prefix: prefer orders_products_id (the user's requested value),
-    // then order_product_id, otherwise fall back to orderId_productId combination.
-    const ordersProductsId = firstItem.orders_products_id?.[0] || firstItem.orders_products_id || null;
-    const orderProductId = firstItem.order_product_id?.[0] || firstItem.order_product_id || null;
-    const orderId = order.orders_id?.[0] || order.orders_id || null;
-    let line_identifier_no_prefix = '';
-    if (ordersProductsId) {
-      line_identifier_no_prefix = String(ordersProductsId);
-    } else if (orderProductId) {
-      line_identifier_no_prefix = String(orderProductId);
-    } else if (orderId) {
-      // fallback: combine order id and any product id present
-      line_identifier_no_prefix = `${orderId}_${orderProductId || ''}`;
-    }
+      // Parse kinds (versions) as integer
+      let kinds = 0;
+      const versionsRaw = firstItem.features_details?.[0]?.Versions?.[0] || '';
+      const kindsMatch = versionsRaw.match(/(\d+)/);
+      if (kindsMatch) {
+        kinds = parseInt(kindsMatch[1], 10);
+      }
 
-    // Info: log the computed line identifier (minimal logging)
-    console.log('Computed line_identifier_no_prefix =', line_identifier_no_prefix);
+      // Compose line_identifier_no_prefix per item
+      const ordersProductsId = firstItem.orders_products_id?.[0] || firstItem.orders_products_id || null;
+      const orderProductId = firstItem.order_product_id?.[0] || firstItem.order_product_id || null;
+      const orderId = order.orders_id?.[0] || order.orders_id || null;
+      let line_identifier_no_prefix = '';
+      if (ordersProductsId) {
+        line_identifier_no_prefix = String(ordersProductsId);
+      } else if (orderProductId) {
+        line_identifier_no_prefix = String(orderProductId);
+      } else if (orderId) {
+        line_identifier_no_prefix = `${orderId}_${orderProductId || ''}`;
+      }
 
-    // Format order_date and calculate due_date (5 business days after order_date)
-    let order_date_raw = order.orders_date_finished?.[0] || order.order_date_finished?.[0];
-    let order_date = order_date_raw ? formatDateForDB(order_date_raw.split(' ')[0]) : null;
-    let due_date = null;
-    if (order_date) {
-      const orderDateObj = new Date(order_date);
-      const dueDateObj = addBusinessDays(orderDateObj, 5);
-      // Format as YYYY-MM-DD
-      due_date = dueDateObj.toISOString().slice(0, 10);
-    }
+      console.log('Computed line_identifier_no_prefix =', line_identifier_no_prefix);
 
-    // Insert/update job (jobs table)
-    await client.query(`
+      // Insert/update job (jobs table)
+      await client.query(`
       INSERT INTO jobs (job_id, job_number, customer_id, notes, shipping_mode, courier_company_name, shipping_type_id, order_date, due_date, product_name, qty_ordered, size_x, size_y, product_id, finishing_id, material_id, kinds, hand_machine_applied, print_colour, cores, roll_direction, job_name, line_identifier_no_prefix)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
       ON CONFLICT (job_id) DO UPDATE SET
@@ -229,31 +229,33 @@ async function main() {
         job_name = EXCLUDED.job_name,
         line_identifier_no_prefix = EXCLUDED.line_identifier_no_prefix
     `, [
-      jobId,
-      jobNumber,
-      customerId,
-      order.order_note?.[0] || '',
-      order.shipping_mode?.[0] || '',
-      order.courirer_company_name?.[0] || '',
-      order.shipping_type_id?.[0] || '',
-      order_date,
-      due_date,
-      firstItem.products_name?.[0] || '',
-      firstItem.products_quantity?.[0] || '',
-      size_x,
-      size_y,
-      firstItem.product_id?.[0] || '',
-      finishing_id,
-      material_id,
-      kinds,
-      firstItem.features_details?.[0]?.Application?.[0] || '', // hand_machine_applied
-      print_colour,
-      firstItem.features_details?.[0]?.Core_Size?.[0] || '', // cores
-      firstItem.features_details?.[0]?.Roll_Direction?.[0] || '',
-      // Map job_name as product_title
-      firstItem.products_title?.[0] || '',
-      line_identifier_no_prefix
-    ]);
+        'Labex_' + (order.orders_id?.[0] || order.orders_id || '') + '_' + (ordersProductsId || ''),
+        jobNumber,
+        customerId,
+        order.order_note?.[0] || '',
+        order.shipping_mode?.[0] || '',
+        order.courirer_company_name?.[0] || '',
+        order.shipping_type_id?.[0] || '',
+        order_date,
+        due_date,
+        firstItem.products_name?.[0] || '',
+        firstItem.products_quantity?.[0] || '',
+        size_x,
+        size_y,
+        firstItem.product_id?.[0] || '',
+        finishing_id,
+        material_id,
+        kinds,
+        firstItem.features_details?.[0]?.Application?.[0] || '', // hand_machine_applied
+        print_colour,
+        firstItem.features_details?.[0]?.Core_Size?.[0] || '', // cores
+        firstItem.features_details?.[0]?.Roll_Direction?.[0] || '',
+        // Map job_name as product_title
+        firstItem.products_title?.[0] || '',
+        line_identifier_no_prefix
+      ]);
+    }
+
     await client.end();
   } catch (error) {
     console.error('An error occurred:', error);

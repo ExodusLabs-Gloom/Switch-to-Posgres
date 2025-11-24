@@ -1,10 +1,9 @@
 import { readFileSync, existsSync } from 'fs';
-import { join, basename } from 'path';
+import { join, basename, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { parseStringPromise } from 'xml2js';
 import { Client } from 'pg';
 import { config } from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: join(__dirname, '../../.env') });
@@ -42,17 +41,59 @@ function extractNotesFromLineDescription(lineDescription, supply) {
         .filter(line => line.length > 0)
         .join('\n');
 }
+// Parse the new compact processList format: "~19716||Indigo||2^^~19717||Digicon||3^^..."
+function parseCompactProcessList(processListValue) {
+    if (!processListValue)
+        return [];
+    const steps = [];
+    // Split on record separator
+    const records = processListValue.split('^^');
+    for (const record of records) {
+        const trimmed = record.trim();
+        if (!trimmed)
+            continue;
+        const parts = trimmed.split('||');
+        if (parts.length < 3)
+            continue;
+        const [barcode, name, sortStr] = parts;
+        const sort = parseFloat(sortStr);
+        if (!barcode || !name || Number.isNaN(sort))
+            continue;
+        steps.push({ barcode, name, sort });
+    }
+    return steps;
+}
 async function parseQuoteXML(xmlContent) {
     try {
         const result = await parseStringPromise(xmlContent);
         const quotes = [];
-        // The actual XML structure uses <jobline> as root element for both quotes and jobs
+        // Normalise structure: either <jobline>...</jobline> or a flat root object
+        let jobline;
         if (result.jobline) {
-            const jobline = result.jobline;
-            // Extract process steps if they exist
-            const processSteps = [];
-            if (jobline.processList && jobline.processList[0] && jobline.processList[0].item) {
-                for (const item of jobline.processList[0].item) {
+            // Old structure: root is <jobline>
+            jobline = result.jobline;
+        }
+        else {
+            // New structure: fields are direct children of the root
+            // xml2js wraps the root tag name (unknown), so pick the first key
+            const rootKeys = Object.keys(result || {});
+            if (rootKeys.length > 0) {
+                const root = result[rootKeys[0]];
+                if (root && root.lineIdentifier && root.QuoteLineId) {
+                    jobline = root;
+                }
+            }
+        }
+        if (!jobline) {
+            return [];
+        }
+        // Extract process steps for both formats
+        const processSteps = [];
+        if (jobline.processList && jobline.processList[0]) {
+            const pl = jobline.processList[0];
+            if (pl.item) {
+                // Old nested item format
+                for (const item of pl.item) {
                     processSteps.push({
                         barcode: item.barcode[0],
                         name: item.name[0],
@@ -60,47 +101,118 @@ async function parseQuoteXML(xmlContent) {
                     });
                 }
             }
-            quotes.push({
-                lineIdentifier: jobline.lineIdentifier[0],
-                lineIdentifierNoPrefix: jobline.lineIdentifierNoPrefix ? jobline.lineIdentifierNoPrefix[0] : undefined,
-                quoteId: jobline.QuoteId[0], // Note: QuoteId has capital Q in quotes
-                quoteIdNoPrefix: jobline.quoteIdNoPrefix ? jobline.quoteIdNoPrefix[0] : undefined,
-                quoteLineId: jobline.QuoteLineId[0], // Note: QuoteLineId has capital Q and L
-                quoteDescription: jobline.quoteDescription[0],
-                recipeId: jobline.recipeId ? jobline.recipeId[0] : undefined,
-                quoteDate: jobline.quoteDate[0],
-                customerId: jobline.customerId[0],
-                customerName: jobline.customerName[0],
-                quantity: parseInt(jobline.quantity[0]),
-                sibling: jobline.sibling ? parseInt(jobline.sibling[0]) : undefined,
-                siblingCount: jobline.siblingCount ? parseInt(jobline.siblingCount[0]) : undefined,
-                revision: jobline.revision ? parseInt(jobline.revision[0]) : undefined,
-                sizeXmm: jobline.sizeXmm ? parseFloat(jobline.sizeXmm[0]) : undefined,
-                sizeYmm: jobline.sizeYmm ? parseFloat(jobline.sizeYmm[0]) : undefined,
-                fileName: jobline.fileName && jobline.fileName[0] !== 'nan' ? jobline.fileName[0] : undefined,
-                materialName: jobline.materialName && jobline.materialName[0] !== 'nan' ? jobline.materialName[0] : undefined,
-                laminateName: jobline.laminateName && jobline.laminateName[0] !== 'nan' ? jobline.laminateName[0] : undefined,
-                finishingName: jobline.finishingName ? jobline.finishingName[0] : undefined,
-                printColour: jobline.Print_Colour && jobline.Print_Colour[0] !== 'nan' ? jobline.Print_Colour[0] : undefined,
-                tool: jobline.Tool && jobline.Tool[0] !== 'nan' ? jobline.Tool[0] : undefined,
-                cores: jobline.Cores ? jobline.Cores[0] : undefined,
-                handMachineApplied: jobline.key ? jobline.key.find((k) => k.$.name === 'Hand/Machine Applied')?._ : undefined,
-                supply: jobline.Supply ? jobline.Supply[0] : undefined,
-                kinds: jobline.kinds ? parseInt(jobline.kinds[0]) : undefined,
-                rollDirection: jobline.RollDirection ? jobline.RollDirection[0] : undefined,
-                lineDescription: jobline.lineDescription[0],
-                notes: extractNotesFromLineDescription(jobline.lineDescription[0], jobline.Supply ? jobline.Supply[0] : ''),
-                deliveryToAddress: jobline.deliveryToAddress && jobline.deliveryToAddress[0] !== 'nan' ? jobline.deliveryToAddress[0] : undefined,
-                profitCentreName: jobline.profitCentreName ? jobline.profitCentreName[0] : undefined,
-                processSteps: processSteps
-            });
+            else if (typeof pl === 'string') {
+                // New compact string format on root
+                processSteps.push(...parseCompactProcessList(pl));
+            }
+            else if (Array.isArray(pl) && typeof pl[0] === 'string') {
+                processSteps.push(...parseCompactProcessList(pl[0]));
+            }
         }
+        // Handle different tag spellings / structures
+        const printColour = (jobline.Print_Colour && jobline.Print_Colour[0]) ||
+            (jobline['Print Colour'] && jobline['Print Colour'][0]) ||
+            undefined;
+        // Old: <key name="Hand/Machine Applied">HAND APPLIED</key>
+        // New (after normalisation): <HandMachineApplied>HAND APPLIED</HandMachineApplied>
+        let handMachineApplied;
+        if (jobline.key && Array.isArray(jobline.key)) {
+            const keyVal = jobline.key.find((k) => k.$ && k.$.name === 'Hand/Machine Applied');
+            if (keyVal && typeof keyVal._ === 'string') {
+                handMachineApplied = keyVal._;
+            }
+        }
+        if (!handMachineApplied && jobline['Hand/Machine Applied']) {
+            handMachineApplied = jobline['Hand/Machine Applied'][0];
+        }
+        if (!handMachineApplied && jobline.HandMachineApplied) {
+            handMachineApplied = jobline.HandMachineApplied[0];
+        }
+        const supply = jobline.Supply ? jobline.Supply[0] : undefined;
+        const lineDescription = jobline.lineDescription ? jobline.lineDescription[0] : '';
+        quotes.push({
+            lineIdentifier: jobline.lineIdentifier[0],
+            lineIdentifierNoPrefix: jobline.lineIdentifierNoPrefix ? jobline.lineIdentifierNoPrefix[0] : undefined,
+            quoteId: jobline.QuoteId[0],
+            quoteIdNoPrefix: jobline.quoteIdNoPrefix ? jobline.quoteIdNoPrefix[0] : undefined,
+            quoteLineId: jobline.QuoteLineId[0],
+            quoteDescription: jobline.quoteDescription[0],
+            recipeId: jobline.recipeId ? jobline.recipeId[0] : undefined,
+            quoteDate: jobline.quoteDate[0],
+            customerId: jobline.customerId[0],
+            customerName: jobline.customerName[0],
+            quantity: parseInt(jobline.quantity[0]),
+            sibling: jobline.sibling ? parseInt(jobline.sibling[0]) : undefined,
+            siblingCount: jobline.siblingCount ? parseInt(jobline.siblingCount[0]) : undefined,
+            revision: jobline.revision ? parseInt(jobline.revision[0]) : undefined,
+            sizeXmm: jobline.sizeXmm ? parseFloat(jobline.sizeXmm[0]) : undefined,
+            sizeYmm: jobline.sizeYmm ? parseFloat(jobline.sizeYmm[0]) : undefined,
+            fileName: jobline.fileName && jobline.fileName[0] !== 'nan' ? jobline.fileName[0] : undefined,
+            materialName: jobline.materialName && jobline.materialName[0] !== 'nan' ? jobline.materialName[0] : undefined,
+            laminateName: jobline.laminateName && jobline.laminateName[0] !== 'nan' ? jobline.laminateName[0] : undefined,
+            finishingName: jobline.finishingName ? jobline.finishingName[0] : undefined,
+            printColour: printColour && printColour !== 'nan' ? printColour : undefined,
+            tool: jobline.Tool && jobline.Tool[0] !== 'nan' ? jobline.Tool[0] : undefined,
+            cores: jobline.Cores ? jobline.Cores[0] : undefined,
+            handMachineApplied,
+            supply,
+            kinds: jobline.kinds ? parseInt(jobline.kinds[0]) : undefined,
+            rollDirection: jobline.RollDirection ? jobline.RollDirection[0] : undefined,
+            lineDescription,
+            notes: extractNotesFromLineDescription(lineDescription, supply || ''),
+            deliveryToAddress: jobline.deliveryToAddress && jobline.deliveryToAddress[0] !== 'nan' ? jobline.deliveryToAddress[0] : undefined,
+            profitCentreName: jobline.profitCentreName ? jobline.profitCentreName[0] : undefined,
+            processSteps
+        });
         return quotes;
     }
     catch (error) {
         console.error('Error parsing XML:', error);
         return [];
     }
+}
+async function parseQuoteJSON(jsonContent) {
+    const obj = JSON.parse(jsonContent);
+    const processSteps = parseCompactProcessList(obj.processList);
+    const printColour = obj['Print Colour'];
+    const handMachineApplied = obj['Hand/Machine Applied'] ?? undefined;
+    const supply = obj.Supply;
+    const lineDescription = obj.lineDescription;
+    const quote = {
+        lineIdentifier: String(obj.lineIdentifier),
+        lineIdentifierNoPrefix: obj.lineIdentifierNoPrefix ? String(obj.lineIdentifierNoPrefix) : undefined,
+        quoteId: String(obj.QuoteId),
+        quoteIdNoPrefix: obj.quoteIdNoPrefix ? String(obj.quoteIdNoPrefix) : undefined,
+        quoteLineId: String(obj.QuoteLineId),
+        quoteDescription: String(obj.quoteDescription),
+        recipeId: obj.recipeId !== undefined ? String(obj.recipeId) : undefined,
+        quoteDate: String(obj.quoteDate),
+        customerId: String(obj.customerId),
+        customerName: String(obj.customerName),
+        quantity: Number(obj.quantity),
+        sibling: obj.sibling !== undefined ? Number(obj.sibling) : undefined,
+        siblingCount: obj.siblingCount !== undefined ? Number(obj.siblingCount) : undefined,
+        revision: obj.revision !== undefined ? Number(obj.revision) : undefined,
+        sizeXmm: obj.sizeXmm !== undefined && obj.sizeXmm !== "" ? Number(obj.sizeXmm) : undefined,
+        sizeYmm: obj.sizeYmm !== undefined && obj.sizeYmm !== "" ? Number(obj.sizeYmm) : undefined,
+        fileName: obj.fileName && obj.fileName !== '' ? String(obj.fileName) : undefined,
+        materialName: obj.materialName && obj.materialName !== '' ? String(obj.materialName) : undefined,
+        laminateName: obj.laminateName && obj.laminateName !== '' ? String(obj.laminateName) : undefined,
+        finishingName: obj.finishingName && obj.finishingName !== '' ? String(obj.finishingName) : undefined,
+        printColour: printColour && printColour !== '' ? printColour : undefined,
+        tool: obj.Tool && obj.Tool !== '' ? String(obj.Tool) : undefined,
+        cores: obj.Cores && obj.Cores !== '' ? String(obj.Cores) : undefined,
+        handMachineApplied,
+        supply,
+        kinds: obj.kinds !== undefined ? Number(obj.kinds) : undefined,
+        rollDirection: obj.RollDirection ? String(obj.RollDirection) : undefined,
+        lineDescription: lineDescription || '',
+        notes: extractNotesFromLineDescription(lineDescription || '', supply || ''),
+        deliveryToAddress: obj.deliveryToAddress && obj.deliveryToAddress !== '' ? String(obj.deliveryToAddress) : undefined,
+        profitCentreName: obj.profitCentreName ? String(obj.profitCentreName) : undefined,
+        processSteps,
+    };
+    return [quote];
 }
 async function uploadToDatabase(quotes) {
     const client = new Client({
@@ -192,20 +304,35 @@ async function uploadToDatabase(quotes) {
 }
 async function main() {
     try {
-        console.log('Starting quote XML processing...');
-        // Get XML file path from command line arguments
+        console.log('Starting quote XML/JSON processing...');
         const xmlFilePath = process.argv[2];
         if (!xmlFilePath) {
-            console.error('Error: Please provide XML file path as argument');
+            console.error('Error: Please provide XML or JSON file path as argument');
             process.exit(1);
         }
         if (!existsSync(xmlFilePath)) {
-            console.error(`Error: XML file not found at ${xmlFilePath}`);
+            console.error(`Error: file not found at ${xmlFilePath}`);
             process.exit(1);
         }
         console.log(`Processing ${xmlFilePath}...`);
-        const xmlContent = readFileSync(xmlFilePath, 'utf8');
-        const quotes = await parseQuoteXML(xmlContent);
+        const content = readFileSync(xmlFilePath, 'utf8');
+        const lower = xmlFilePath.toLowerCase();
+        let quotes = [];
+        if (lower.endsWith('.json')) {
+            quotes = await parseQuoteJSON(content);
+        }
+        else {
+            let xmlContent = content;
+            xmlContent = xmlContent
+                .replace(/<Hand\/Machine Applied>/g, '<HandMachineApplied>')
+                .replace(/<\/Hand\/Machine Applied>/g, '</HandMachineApplied>');
+            const trimmed = xmlContent.trim();
+            if (!trimmed.startsWith('<jobline') && !trimmed.startsWith('<?xml')) {
+                console.log('No root <jobline> element detected, wrapping content...');
+                xmlContent = `<jobline>\n${xmlContent}\n</jobline>`;
+            }
+            quotes = await parseQuoteXML(xmlContent);
+        }
         if (quotes.length > 0) {
             await uploadToDatabase(quotes);
             console.log(`Successfully processed ${basename(xmlFilePath)}`);
@@ -213,7 +340,7 @@ async function main() {
         else {
             console.log(`No quotes found in ${basename(xmlFilePath)}`);
         }
-        console.log('Quote XML processing completed');
+        console.log('Processing completed');
     }
     catch (error) {
         console.error('Error in main process:', error);

@@ -67,7 +67,39 @@ interface ProcessStep {
 
 async function parseJobXML(xmlContent: string): Promise<JobXMLData[]> {
   try {
-    const result = await parseStringPromise(xmlContent);
+    // Validation: Check if XML has a root element, if not wrap it in <jobline>
+    let processedXml = xmlContent.trim();
+    
+    // Check if XML starts with <?xml declaration
+    const hasXmlDeclaration = processedXml.startsWith('<?xml');
+    
+    // Remove XML declaration temporarily if present
+    let xmlDeclaration = '';
+    if (hasXmlDeclaration) {
+      const declarationEnd = processedXml.indexOf('?>');
+      if (declarationEnd !== -1) {
+        xmlDeclaration = processedXml.substring(0, declarationEnd + 2);
+        processedXml = processedXml.substring(declarationEnd + 2).trim();
+      }
+    }
+    
+    // Check if content has a root element wrapper
+    // Valid XML should start with a single root element like <jobline>...</jobline>
+    // Invalid XML (from newxml folder) has multiple top-level elements
+    const needsWrapper = !processedXml.startsWith('<jobline>') && 
+                        !processedXml.startsWith('<jobs>');
+    
+    if (needsWrapper) {
+      console.log('Warning: XML missing root element, wrapping in <jobline>');
+      processedXml = `<jobline>${processedXml}</jobline>`;
+    }
+    
+    // Re-add XML declaration if it was present
+    if (xmlDeclaration) {
+      processedXml = xmlDeclaration + '\n' + processedXml;
+    }
+    
+    const result = await parseStringPromise(processedXml);
     const jobs: JobXMLData[] = [];
     
     // The actual XML structure uses <jobline> as root element
