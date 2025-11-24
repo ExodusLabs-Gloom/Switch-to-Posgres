@@ -51,6 +51,11 @@ interface ProcessStep {
   sort: number;
 }
 
+interface ParseResult {
+  quotes: QuoteXMLData[];
+  processedXml: string;
+}
+
 // Helper function to convert DD-MM-YYYY to YYYY-MM-DD
 function formatDateForDB(dateString: string): string {
   if (!dateString) return dateString;
@@ -109,9 +114,41 @@ function parseCompactProcessList(processListValue: string | undefined): ProcessS
   return steps;
 }
 
-async function parseQuoteXML(xmlContent: string): Promise<QuoteXMLData[]> {
+async function parseQuoteXML(xmlContent: string): Promise<ParseResult> {
   try {
-    const result = await parseStringPromise(xmlContent);
+    // Validation: Check if XML has a root element, if not wrap it in <jobline>
+    let processedXml = xmlContent.trim();
+    
+    // Check if XML starts with <?xml declaration
+    const hasXmlDeclaration = processedXml.startsWith('<?xml');
+    
+    // Remove XML declaration temporarily if present
+    let xmlDeclaration = '';
+    if (hasXmlDeclaration) {
+      const declarationEnd = processedXml.indexOf('?>');
+      if (declarationEnd !== -1) {
+        xmlDeclaration = processedXml.substring(0, declarationEnd + 2);
+        processedXml = processedXml.substring(declarationEnd + 2).trim();
+      }
+    }
+    
+    // Check if content has a root element wrapper
+    // Valid XML should start with a single root element like <jobline>...</jobline>
+    // Invalid XML (from newxml folder) has multiple top-level elements
+    const needsWrapper = !processedXml.startsWith('<jobline>') && 
+                        !processedXml.startsWith('<quotes>');
+    
+    if (needsWrapper) {
+      console.log('Warning: XML missing root element, wrapping in <jobline>');
+      processedXml = `<jobline>${processedXml}</jobline>`;
+    }
+    
+    // Re-add XML declaration if it was present
+    if (xmlDeclaration) {
+      processedXml = xmlDeclaration + '\n' + processedXml;
+    }
+    
+    const result = await parseStringPromise(processedXml);
     const quotes: QuoteXMLData[] = [];
 
     // Normalise structure: either <jobline>...</jobline> or a flat root object
@@ -133,7 +170,7 @@ async function parseQuoteXML(xmlContent: string): Promise<QuoteXMLData[]> {
     }
 
     if (!jobline) {
-      return [];
+      return { quotes: [], processedXml };
     }
 
     // Extract process steps for both formats
@@ -218,10 +255,10 @@ async function parseQuoteXML(xmlContent: string): Promise<QuoteXMLData[]> {
       processSteps
     });
 
-    return quotes;
+    return { quotes, processedXml };
   } catch (error) {
     console.error('Error parsing XML:', error);
-    return [];
+    return { quotes: [], processedXml: xmlContent };
   }
 }
 
@@ -370,7 +407,11 @@ async function uploadToDatabase(quotes: QuoteXMLData[]) {
 async function main() {
   try {
     console.log('Starting quote XML/JSON processing...');
+    
+    // Get XML file path and optional output path from command line arguments
     const xmlFilePath = process.argv[2];
+    const outputPath = process.argv[3]; // Optional: where to save wrapped XML
+    
     if (!xmlFilePath) {
       console.error('Error: Please provide XML or JSON file path as argument');
       process.exit(1);
@@ -385,6 +426,7 @@ async function main() {
     const lower = xmlFilePath.toLowerCase();
 
     let quotes: QuoteXMLData[] = [];
+    let processedXml: string | undefined;
 
     if (lower.endsWith('.json')) {
       quotes = await parseQuoteJSON(content);
@@ -398,7 +440,19 @@ async function main() {
         console.log('No root <jobline> element detected, wrapping content...');
         xmlContent = `<jobline>\n${xmlContent}\n</jobline>`;
       }
-      quotes = await parseQuoteXML(xmlContent);
+      const result = await parseQuoteXML(xmlContent);
+      quotes = result.quotes;
+      processedXml = result.processedXml;
+    }
+    
+    // If output path is provided and we have processed XML, save it
+    if (outputPath && processedXml) {
+      try {
+        writeFileSync(outputPath, processedXml, 'utf8');
+        console.log(`Wrapped XML saved to: ${outputPath}`);
+      } catch (error) {
+        console.warn(`Warning: Could not write wrapped XML to ${outputPath}:`, (error as Error).message);
+      }
     }
 
     if (quotes.length > 0) {
