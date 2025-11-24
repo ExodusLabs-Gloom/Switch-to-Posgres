@@ -1,6 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
-import { parseStringPromise } from 'xml2js';
+import { parseStringPromise, Builder } from 'xml2js';
 import { Client } from 'pg';
 import { config } from 'dotenv';
 import { fileURLToPath } from 'url';
@@ -9,6 +9,33 @@ import { writeFileSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 config({ path: join(__dirname, '../../.env') });
+/**
+ * Validates XML by parsing and rebuilding it using xml2js.
+ * Throws an error if the XML is not well-formed.
+ * Returns the validated (and potentially reformatted) XML string.
+ */
+async function validateXML(xmlString) {
+    try {
+        // Parse the XML to validate it
+        const parsed = await parseStringPromise(xmlString, {
+            trim: true,
+            explicitArray: false,
+            mergeAttrs: true
+        });
+        // Rebuild the XML to ensure it's well-formed
+        const builder = new Builder({
+            xmldec: { version: '1.0', encoding: 'UTF-8' },
+            renderOpts: { pretty: true, indent: '  ' }
+        });
+        const validatedXml = builder.buildObject(parsed);
+        console.log('✓ XML validation passed');
+        return validatedXml;
+    }
+    catch (error) {
+        console.error('✗ XML validation failed:', error.message);
+        throw new Error(`Invalid XML format: ${error.message}`);
+    }
+}
 async function parseJobXML(xmlContent) {
     try {
         // Validation: Check if XML has a root element, if not wrap it in <jobline>
@@ -292,14 +319,17 @@ async function main() {
         console.log(`Processing ${xmlFilePath}...`);
         const xmlContent = readFileSync(xmlFilePath, 'utf8');
         const { jobs, processedXml } = await parseJobXML(xmlContent);
-        // If output path is provided, save the wrapped/corrected XML
+        // If output path is provided, validate and save the wrapped/corrected XML
         if (outputPath) {
             try {
-                writeFileSync(outputPath, processedXml, 'utf8');
-                console.log(`Wrapped XML saved to: ${outputPath}`);
+                // Validate XML before writing
+                const validatedXml = await validateXML(processedXml);
+                writeFileSync(outputPath, validatedXml, 'utf8');
+                console.log(`Validated XML saved to: ${outputPath}`);
             }
             catch (error) {
-                console.warn(`Warning: Could not write wrapped XML to ${outputPath}:`, error.message);
+                console.error(`Error: Could not save validated XML to ${outputPath}:`, error.message);
+                throw error;
             }
         }
         if (jobs.length > 0) {
